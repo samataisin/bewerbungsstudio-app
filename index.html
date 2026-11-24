@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bewerbungsstudio</title>
+<meta name="description" content="Bewerbung aus einer Stellenanzeige bauen und per Mail teilen.">
+<meta name="theme-color" content="#1b3a57">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Bewerbung">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="robots" content="noindex, nofollow">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>Bewerbungsstudio</h1>
+    <p class="sub">Anzeige einfügen, prüfen, Mappe per Mail teilen. Deine Daten bleiben auf diesem Gerät.</p>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button role="tab" aria-selected="true" data-tab="bew">Bewerbung</button>
+    <button role="tab" aria-selected="false" data-tab="hist">Verlauf <span class="count" id="histCount">0</span></button>
+    <button role="tab" aria-selected="false" data-tab="set">Einstellungen</button>
+  </nav>
+
+  <!-- Bewerbung -->
+  <section id="p-bew" role="tabpanel" class="stack">
+    <div class="notice" id="noPaket" hidden>
+      Zuerst dein Paket laden: Tab „Einstellungen“ → „Paket laden“. Ohne Paket kennt die App weder deinen Lebenslauf noch deine Textbausteine.
+    </div>
+
+    <div class="panel">
+      <h2>1. Stellenanzeige</h2>
+      <textarea id="anzeige" rows="8" placeholder="Text der Anzeige hier einfügen" spellcheck="false"></textarea>
+      <div class="row">
+        <button class="btn" id="pasteBtn">Aus Zwischenablage einfügen</button>
+        <button class="btn ghost" id="parseBtn">Auslesen</button>
+        <button class="btn ghost" id="clearBtn">Leeren</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>2. Erkannte Daten prüfen</h2>
+      <div class="fields">
+        <label class="wide">Richtung<select id="f-direction"></select></label>
+        <label class="wide">Stelle<input id="f-role" autocomplete="off"></label>
+        <label class="wide">Firma<input id="f-firm" autocomplete="off"></label>
+        <label>Anrede<select id="f-gender"><option value="">unbekannt</option><option>Frau</option><option>Herr</option></select></label>
+        <label>Titel<input id="f-title" placeholder="z. B. Dr." autocomplete="off"></label>
+        <label>Vorname<input id="f-first" autocomplete="off"></label>
+        <label>Nachname<input id="f-last" placeholder="leer = Damen und Herren" autocomplete="off"></label>
+        <label class="wide">Straße<input id="f-street" autocomplete="off"></label>
+        <label class="wide">PLZ und Ort<input id="f-city" autocomplete="off"></label>
+        <label class="wide">E-Mail für die Bewerbung<input id="f-email" type="email" inputmode="email" autocomplete="off"></label>
+        <label class="wide">Beginn<input id="f-start" placeholder="z. B. 01.10.2027 oder ab sofort" autocomplete="off"></label>
+        <label class="wide">Eigener Satz (optional, nur Fakten aus dem Lebenslauf)<textarea id="f-notiz" rows="2"></textarea></label>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="row between">
+        <h2>3. Vorschau und Prüfer</h2>
+        <div class="switch" role="group" aria-label="Ansicht">
+          <button id="v-letter" aria-pressed="true">Anschreiben</button>
+          <button id="v-mail" aria-pressed="false">E-Mail</button>
+        </div>
+      </div>
+      <div id="letterView" class="paper">
+        <div class="addr" id="l-addr"></div>
+        <div class="date" id="l-date"></div>
+        <div class="subject" id="l-subject"></div>
+        <div id="l-body"></div>
+      </div>
+      <div id="mailView" class="mail" hidden>
+        <dl class="meta"><dt>An</dt><dd id="m-to"></dd><dt>Betreff</dt><dd id="m-subject"></dd></dl>
+        <div class="mbody" id="m-body"></div>
+        <div class="attach"><span id="m-attach">Aisin-Bewerbungsmappe.pdf</span></div>
+      </div>
+      <ul class="checks" id="checks"></ul>
+    </div>
+
+    <div class="panel">
+      <h2>4. Senden</h2>
+      <p class="hint">„Mappe teilen“ öffnet das Teilen-Menü. Dort „Mail“ wählen: PDF und Text sind schon drin. Empfänger und Betreff vorher hier kopieren und in der Mail einfügen.</p>
+      <div class="row">
+        <button class="btn" id="copyTo">Empfänger kopieren</button>
+        <button class="btn" id="copySubject">Betreff kopieren</button>
+        <button class="btn ghost" id="copyText">Text kopieren</button>
+      </div>
+      <div class="row">
+        <button class="btn primary" id="shareBtn">Mappe teilen</button>
+        <button class="btn ghost" id="viewBtn">PDF ansehen</button>
+        <button class="btn ghost" id="sentBtn">Als gesendet eintragen</button>
+      </div>
+      <div class="toast" id="toast" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <!-- Verlauf -->
+  <section id="p-hist" role="tabpanel" class="stack" hidden>
+    <div class="stats" id="stats"></div>
+    <div class="hist" id="hist"></div>
+    <p class="hint">Nach 14 Tagen ohne Antwort steht „Nachfassen fällig“. Dann eine kurze, freundliche Nachfrage schicken.</p>
+  </section>
+
+  <!-- Einstellungen -->
+  <section id="p-set" role="tabpanel" class="stack" hidden>
+    <div class="panel">
+      <h2>Paket</h2>
+      <p class="hint">Das Paket baust du auf dem Laptop mit <code>python bewerbung/src/prepare_web.py</code>. Es enthält dein Profil, die Textbausteine, Lebenslauf und Zeugnis. Es wird nur auf diesem Gerät gespeichert und nie hochgeladen.</p>
+      <dl class="status" id="paketStatus"></dl>
+      <div class="row">
+        <label class="btn filebtn">Paket laden<input type="file" id="paketFile" accept=".json,application/json"></label>
+        <button class="btn ghost" id="paketRemove">Paket entfernen</button>
+      </div>
+    </div>
+    <div class="panel">
+      <h2>Auf den Home-Bildschirm</h2>
+      <p class="hint">In Safari unten auf „Teilen“ tippen, dann „Zum Home-Bildschirm“. So startet die App wie eine normale App, funktioniert ohne Internet und iOS löscht deine Daten nicht automatisch.</p>
+    </div>
+    <div class="panel">
+      <h2>Verlauf sichern</h2>
+      <div class="row">
+        <button class="btn ghost" id="exportCsv">Verlauf als CSV teilen</button>
+      </div>
+    </div>
+    <p class="hint" id="version"></p>
+  </section>
+</div>
+
+<script src="vendor/pdf-lib.min.js"></script>
+<script src="parser.js"></script>
+<script src="rules.js"></script>
+<script src="core.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
